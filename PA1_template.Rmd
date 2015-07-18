@@ -26,9 +26,13 @@ activity <- read.csv("activity.csv")
 ## What is mean total number of steps taken per day?
 
 1. Processing the data
+
+Here a new data.frame is made with two columns: one for date and one for the sum of steps of that day.
+
 ```{r}
 daily.steps <- activity %>% group_by(date) %>% 
     summarize(sum = sum(steps, na.rm = TRUE))
+head(daily.steps)
 ```
 
 2. Plot the histogram
@@ -39,7 +43,7 @@ h + geom_histogram(binwidth = 1000, aes(fill = ..count..)) +
               x = "Number of steps per day", y = "Count"))
 ```
 
-3. Calculate the mean and median
+3. Calculate the mean and median of steps taken per day
 ```{r}
 mean(daily.steps$sum)
 median(daily.steps$sum)
@@ -48,12 +52,15 @@ median(daily.steps$sum)
 ## What is the average daily activity pattern?
 
 1. Data processing
+
+The first line of the code makes a new data.frame containing the average number of steps of each 5-minute interval. The second line converts the class of time interval from character to time ("POSIXlt" "POSIXt"), which lets the time axis of the following plot more straightforward.
+
 ```{r}
 avg.activity <- activity %>% group_by(interval) %>% 
     summarize(avg = mean(steps, na.rm = TRUE))
 avg.activity$time <- strptime(sprintf("%04d", avg.activity$interval), 
-                          format="%H%M") 
-    # class: "POSIXlt" "POSIXt" 
+                          format="%H%M")
+str(avg.activity)
 ```
 
 2. Make a time series plot
@@ -80,11 +87,15 @@ sum(is.na(activity$steps))
 ```
 
 2. Filling in all of the missing values
+
+Here the strategy is to fill all of the missing values in the dataset by the mean for that 5-minute interval. It first add a new column containing the average value of that interval ("avg"), and then replace the steps value by it if the value of steps is NA.
+
 ```{r}
 new.activity <- activity %>% group_by(interval) %>% 
     mutate(avg = mean(steps, na.rm = TRUE)) 
 new.activity$steps[!complete.cases(new.activity)] <-
     new.activity$avg[!complete.cases(new.activity)]
+head(new.activity)
 ```
 
 3. Make a histogram of the total number of steps taken each day
@@ -112,17 +123,19 @@ week.activity <- activity %>% mutate(day = weekdays(as.Date(date))) %>%
     mutate(weekday = ifelse(day == "Sunday" | day == "Saturday", 
                             "weekend", "weekday"))
 week.activity$weekday <- as.factor(week.activity$weekday)
+head(week.activity)
 ```
 
 2. Make a weekday v.s. weekend activity pattern
+
+Note here the class of time must be converted to "POSIXct" "POSIXt" or an error will occur when ploting through *ggplot2*.
+
 ```{r}
 week.activity <- week.activity %>% group_by(weekday, interval) %>% 
     summarize(avg = mean(steps, na.rm = TRUE))
 week.activity$time <- as.POSIXct(
     strptime(sprintf("%04d", week.activity$interval), format="%H%M"))
-        # class: "POSIXct" "POSIXt"  
-        # Use Date class POSIXlt, POSIXt render the error occurs
-        # "Error: column 'time' has unsupported type : POSIXlt, POSIXt"
+str(week.activity)
 ```
 
 3. Make a time series plot
