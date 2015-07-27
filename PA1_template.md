@@ -29,7 +29,7 @@ Here a new data.frame is made with two columns: one for date and one for the sum
 
 ```r
 daily.steps <- activity %>% group_by(date) %>% 
-    summarize(sum = sum(steps, na.rm = TRUE))
+    summarize(sum = sum(steps, na.rm = FALSE))
 head(daily.steps)
 ```
 
@@ -37,7 +37,7 @@ head(daily.steps)
 ## Source: local data frame [6 x 2]
 ## 
 ##         date   sum
-## 1 2012-10-01     0
+## 1 2012-10-01    NA
 ## 2 2012-10-02   126
 ## 3 2012-10-03 11352
 ## 4 2012-10-04 12116
@@ -59,19 +59,19 @@ h + geom_histogram(binwidth = 1000, aes(fill = ..count..)) +
 3. Calculate the mean and median of steps taken per day
 
 ```r
-mean(daily.steps$sum)
+mean(daily.steps$sum, na.rm = TRUE)
 ```
 
 ```
-## [1] 9354.23
+## [1] 10766.19
 ```
 
 ```r
-median(daily.steps$sum)
+median(daily.steps$sum, na.rm = TRUE)
 ```
 
 ```
-## [1] 10395
+## [1] 10765
 ```
 
 ## What is the average daily activity pattern?
@@ -93,7 +93,7 @@ str(avg.activity)
 ## Classes 'tbl_df', 'tbl' and 'data.frame':	288 obs. of  3 variables:
 ##  $ interval: int  0 5 10 15 20 25 30 35 40 45 ...
 ##  $ avg     : num  1.717 0.3396 0.1321 0.1509 0.0755 ...
-##  $ time    : POSIXlt, format: "2015-07-17 00:00:00" "2015-07-17 00:05:00" ...
+##  $ time    : POSIXlt, format: "2015-07-25 00:00:00" "2015-07-25 00:05:00" ...
 ##  - attr(*, "drop")= logi TRUE
 ```
 
@@ -101,6 +101,13 @@ str(avg.activity)
 
 ```r
 library(scales) # for using scale_x_datetime
+```
+
+```
+## Warning: package 'scales' was built under R version 3.1.3
+```
+
+```r
 t <- ggplot(avg.activity, aes(x = time, y = avg))
 t + geom_line(aes(colour = avg)) + 
     scale_x_datetime(labels = date_format("%H:%M")) +
@@ -197,7 +204,7 @@ median(new.daily.steps$sum)
 
 ```r
 week.activity <- activity %>% mutate(day = weekdays(as.Date(date))) %>%
-    mutate(weekday = ifelse(day == "Sunday" | day == "Saturday", 
+    mutate(weekday = ifelse(day %in% c("Sunday", "Saturday"), 
                             "weekend", "weekday"))
 week.activity$weekday <- as.factor(week.activity$weekday)
 head(week.activity)
@@ -231,7 +238,7 @@ str(week.activity)
 ##  $ weekday : Factor w/ 2 levels "weekday","weekend": 1 1 1 1 1 1 1 1 1 1 ...
 ##  $ interval: int  0 5 10 15 20 25 30 35 40 45 ...
 ##  $ avg     : num  2.333 0.462 0.179 0.205 0.103 ...
-##  $ time    : POSIXct, format: "2015-07-17 00:00:00" "2015-07-17 00:05:00" ...
+##  $ time    : POSIXct, format: "2015-07-25 00:00:00" "2015-07-25 00:05:00" ...
 ##  - attr(*, "vars")=List of 1
 ##   ..$ : symbol weekday
 ##  - attr(*, "drop")= logi TRUE

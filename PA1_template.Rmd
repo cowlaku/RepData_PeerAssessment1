@@ -31,7 +31,7 @@ Here a new data.frame is made with two columns: one for date and one for the sum
 
 ```{r}
 daily.steps <- activity %>% group_by(date) %>% 
-    summarize(sum = sum(steps, na.rm = TRUE))
+    summarize(sum = sum(steps, na.rm = FALSE))
 head(daily.steps)
 ```
 
@@ -45,8 +45,8 @@ h + geom_histogram(binwidth = 1000, aes(fill = ..count..)) +
 
 3. Calculate the mean and median of steps taken per day
 ```{r}
-mean(daily.steps$sum)
-median(daily.steps$sum)
+mean(daily.steps$sum, na.rm = TRUE)
+median(daily.steps$sum, na.rm = TRUE)
 ```
 
 ## What is the average daily activity pattern?
@@ -120,7 +120,7 @@ median(new.daily.steps$sum)
 1. Create a new factor variable with 2 levels -- "weekday" and "weekend"
 ```{r}
 week.activity <- activity %>% mutate(day = weekdays(as.Date(date))) %>%
-    mutate(weekday = ifelse(day == "Sunday" | day == "Saturday", 
+    mutate(weekday = ifelse(day %in% c("Sunday", "Saturday"), 
                             "weekend", "weekday"))
 week.activity$weekday <- as.factor(week.activity$weekday)
 head(week.activity)
